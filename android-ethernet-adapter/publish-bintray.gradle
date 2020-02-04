@@ -1,0 +1,179 @@
+// In order to use local.properties
+def propertiesFileName = 'local.properties'
+Properties properties = new Properties();
+properties.load(project.rootProject.file(propertiesFileName).newDataInputStream());
+// But I guess I'm good with gradle.properties
+
+/**
+ * Publish to JCentral+Maven Central via Bintray
+ *
+ * Prework for Bintray
+ * 1. Register to Bintray and set up auto-signing:
+ *      a) Generate yourself a keypair, if you don’t have one.
+ *      https://help.github.com/articles/generating-a-new-gpg-key/
+ *      https://central.sonatype.org/pages/working-with-pgp-signatures.html
+ *      b) Add GPG keypair to your profile at tab GPGUserSigning
+ *      https://bintray.com/profile/edit
+ * 2) Add your Sonatype account under “accounts”.
+ *      a) Create your Sonatype account under “accounts”
+ *      b) Setup your default Maven repo with your GPG key signing
+ *      https://central.sonatype.org/pages/ossrh-guide.html#initial-setup
+ * 3. Create and link your package:
+ *      a) Import from a GitHub repo(or create a new Maven package)
+ *      b) Click on “Add to JCenter”
+ * 4. Set up Maven to deploy to Bintray by using pom.xml snippets from “Set me up!” guide, or use the bintray-gradle-plugin.
+ *
+ * Deploying via Bintray with Gradle refer:
+ * https://medium.com/@yegor_zatsepin/simple-way-to-publish-your-android-library-to-jcenter-d1e145bacf1
+ */
+
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'signing'
+/* NOTE: gradle-bintray-plugin makes use of the Signature.getToSignArtifact() method
+ * That method was deprecated in Gradle 4.8
+ * That method was later removed in Gradle 5.0
+ * https://github.com/bintray/gradle-bintray-plugin/issues/300
+ */
+
+def POM_URL = hasProperty('POM_URL') ? findProperty('POM_URL') : 'POM_URL';
+def POM_GIT_URL = hasProperty('POM_GIT_URL') ? findProperty('POM_GIT_URL') : 'POM_GIT_URL';
+def POM_CONNECTION = hasProperty('POM_CONNECTION') ? findProperty('POM_CONNECTION') : 'POM_CONNECTION';
+def POM_LICENSE_ALL = hasProperty('POM_LICENSE_ALL') ? findProperty('POM_LICENSE_ALL') : 'POM_LICENSE_ALL';
+def POM_LICENSE_NAME = hasProperty('POM_LICENSE_NAME') ? findProperty('POM_LICENSE_NAME') : 'POM_LICENSE_NAME';
+def POM_LICENSE_URL = hasProperty('POM_LICENSE_URL') ? findProperty('POM_LICENSE_URL') : 'POM_LICENSE_URL';
+def POM_DEVELOPER_ID = hasProperty('POM_DEVELOPER_ID') ? findProperty('POM_DEVELOPER_ID') : 'POM_DEVELOPER_ID';
+def POM_DEVELOPER_NAME = hasProperty('POM_DEVELOPER_NAME') ? findProperty('POM_DEVELOPER_NAME') : 'POM_DEVELOPER_NAME';
+def POM_DEVELOPER_EMAIL = hasProperty('POM_DEVELOPER_EMAIL') ? findProperty('POM_DEVELOPER_EMAIL') : 'POM_DEVELOPER_EMAIL';
+
+def POM_NAME = hasProperty('POM_NAME') ? findProperty('POM_NAME') : 'POM_NAME';
+def POM_ARTIFACT_ID = hasProperty('POM_ARTIFACT_ID') ? findProperty('POM_ARTIFACT_ID') : 'POM_ARTIFACT_ID';
+def POM_GROUP_ID = hasProperty('POM_GROUP_ID') ? findProperty('POM_GROUP_ID') : 'POM_GROUP_ID';
+def POM_PACKAGING = hasProperty('POM_PACKAGING') ? findProperty('POM_PACKAGING') : 'POM_PACKAGING';
+
+def POM_VERSION = project._versionName
+def POM_DESCRIPTION = POM_GROUP_ID + ':' + POM_ARTIFACT_ID + ':' + POM_VERSION + '@' + POM_PACKAGING
+group = POM_GROUP_ID
+version = POM_VERSION
+
+println "${POM_DESCRIPTION} Bintray Upload Script Applied"
+
+if (POM_PACKAGING == 'jar') {
+    // codes below to publish Java Libraries
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from tasks.javadoc.destinationDir
+    }
+    task sourcesJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+    artifacts {
+        archives jar
+        archives javadocJar
+        archives sourcesJar
+    }
+    signing {
+        // sign configurations.archives
+    }
+} else {
+    // codes below to publish Android Libraries
+    task sourceJar(type: Jar) {
+        from android.sourceSets.main.java.srcDirs
+        classifier "source"
+    }
+    task javadoc(type: Javadoc) {
+        source = android.sourceSets.main.java.srcDirs
+        classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+        destinationDir = file("../javadoc/")
+        failOnError false
+    }
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier = 'javadoc'
+        from tasks.javadoc.destinationDir
+    }
+    //Creating sources with comments
+    task androidSourcesJar(type: Jar) {
+        classifier = 'sources'
+        from android.sourceSets.main.java.srcDirs
+    }
+    artifacts {
+        archives javadocJar
+        archives androidSourcesJar
+    }
+    signing {
+        // sign configurations.archives
+    }
+}
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name POM_NAME
+            packaging POM_PACKAGING
+            groupId POM_GROUP_ID
+            artifactId POM_ARTIFACT_ID
+            description POM_DESCRIPTION
+            url POM_URL
+            scm {
+                url POM_URL
+                connection POM_CONNECTION
+                developerConnection POM_CONNECTION
+            }
+            licenses {
+                license {
+                    name POM_LICENSE_NAME
+                    url POM_LICENSE_URL
+                }
+            }
+            developers {
+                developer {
+                    id POM_DEVELOPER_ID
+                    name POM_DEVELOPER_NAME
+                    email POM_DEVELOPER_EMAIL
+                }
+            }
+        }
+    }
+}
+
+/**
+ * kopihao:
+ * Beware when creating your android library module,
+ * your artifact name should identical as module name
+ * Otherwise, your library files and pom will be uploaded to different hierarchy.
+ * I realized only when I learn to check from the following:
+ * http://jcenter.bintray.com/com/jakewharton/butterknife
+ * http://jcenter.bintray.com/com/loopj/android/android-async-http
+ */
+
+
+def BINTRAY_NAME = POM_ARTIFACT_ID
+def BINTRAY_DESCRIPTION = POM_DESCRIPTION
+def BINTRAY_URL = POM_URL
+def BINTRAY_GIT_URL = POM_GIT_URL
+def BINTRAY_LICENSE_ALL = POM_LICENSE_ALL
+
+def BINTRAY_USER = hasProperty('BINTRAY_USER') ? findProperty('BINTRAY_USER') : 'BINTRAY_USER';
+def BINTRAY_API_KEY = hasProperty('BINTRAY_API_KEY') ? findProperty('BINTRAY_API_KEY') : 'BINTRAY_API_KEY';
+
+bintray {
+    user = BINTRAY_USER
+    key = BINTRAY_API_KEY
+    configurations = ['archives']
+    pkg {
+        repo = 'maven'
+        name = BINTRAY_NAME
+        desc = BINTRAY_DESCRIPTION
+        websiteUrl = BINTRAY_URL
+        vcsUrl = BINTRAY_GIT_URL
+        licenses = BINTRAY_LICENSE_ALL
+        dryRun = false
+        publish = true
+        override = false
+        publicDownloadNumbers = true
+        version {
+            desc = BINTRAY_DESCRIPTION
+        }
+    }
+}

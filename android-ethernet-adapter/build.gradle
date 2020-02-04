@@ -1,4 +1,23 @@
 apply plugin: 'com.android.library'
+def printHeader = "||KOPIHAO>>>>\t|";
+def printFooter = "|\t<<<<KOPIHAO||";
+
+// Publish to No Where via Nothing
+def noDistScript = ""
+// Publish to Maven Central + JCenter via Bintray
+def bintrayDistScript = "publish-bintray.gradle"
+def useDistScript = noDistScript;
+// Generate JAVADOC, requireJAVADOC::boolean works with "AssembleRelease" process only
+def requireJAVADOC = false;
+
+ext {
+    _supportLibrary = '28.0.0'
+    _compileSdkVersion = 29
+    _targetSdkVersion = 29
+    _minSdkVersion = 19
+    _versionCode = 1
+    _versionName = "1.0.1"
+}
 
 android {
     compileSdkVersion 29
@@ -7,10 +26,12 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 29
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion _minSdkVersion
+        targetSdkVersion _targetSdkVersion
+        versionCode _versionCode
+        versionName _versionName
+        setProperty("archivesBaseName", ANDROID_ARTIFACT_ID)
+        // testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles 'consumer-rules.pro'
     }
@@ -24,7 +45,76 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
+    afterEvaluate {
+        def fileExtension = ".aar";
+        def timestamp = "${new Date().format('yyyyMMdd-HHmm')}";
+        def distributionPath = "../${fileExtension}";
+        libraryVariants.all { variant ->
+            variant.outputs.all { output ->
+                def distributionMode = "${variant.buildType.name}"
+                if (outputFile != null && outputFileName.endsWith("${fileExtension}")) {
+                    if ("${variant.flavorName}"?.trim()) {
+                        distributionMode = "${variant.flavorName}-" + distributionMode
+                    }
+                    def finalOutputFileName = "${archivesBaseName}-${_versionName}-${distributionMode}${fileExtension}"
+                    outputFileName = "${finalOutputFileName}"
+                }
+            }
+            variant.assemble.doLast { assemble ->
+                def distributionMode = "${variant.buildType.name}"
+                if ("release" == "${distributionMode}") {
+                    // copy the apk in another directory, add here your
+                    // logic to customize the destination folder
+                    copy {
+                        from variant.outputs*.outputFile
+                        into "${distributionPath}/${timestamp}/${variant.flavorName}"
+                    }
+                    // if you don't want to delete the file after copying it comment the line below
+                    if ("${useDistScript}" == "${noDistScript}") {
+                        delete variant.outputs*.outputFile
+                    }
+                }
+            }
+        }
+        task postAssembleRelease {
+            doLast {
+                println "\t"
+                println "\t"
+                println "${printHeader}***${archivesBaseName} AAR is ready to be distributed!***${printFooter}"
+                if (requireJAVADOC) {
+                    println "${printHeader}***${archivesBaseName} JAVADOC published >> ${tasks.javadoc.destinationDir}!***${printFooter}"
+                }
+                println "\t"
+                println "\t"
+            }
+        }
+        if (requireJAVADOC) {
+            task javadoc(type: Javadoc) {
+                source = android.sourceSets.main.java.srcDirs
+                classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+                destinationDir = file("${distributionPath}/${timestamp}/${archivesBaseName}-${_versionName}-JAVADOC/")
+                failOnError false
+            }
+            task javadocJar(type: Jar, dependsOn: javadoc) {
+                classifier = 'javadoc'
+                from tasks.javadoc.destinationDir
+            }
+            assembleRelease.finalizedBy(javadoc)
+            javadoc.finalizedBy(postAssembleRelease)
+        } else {
+            assembleRelease.finalizedBy(postAssembleRelease)
+        }
+        if ("${useDistScript}"?.trim() == bintrayDistScript) {
+            task publishedToBintray {
+                doLast {
+                    println "${printHeader}***publishedToBintray***${printFooter}"
+                }
+            }
+            postAssembleRelease.finalizedBy(install)
+            install.finalizedBy(bintrayUpload)
+            bintrayUpload.finalizedBy(publishedToBintray)
+        }
+    }
 }
 
 dependencies {
@@ -33,4 +123,10 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     // implementation 'androidx.appcompat:appcompat:1.0.2'
+}
+
+if ("${useDistScript}" != "${noDistScript}") {
+    // Beware, line below shouldn't execute within afterEvaluate{}
+    // This will cause improper setup
+    apply from: "${useDistScript}"
 }
