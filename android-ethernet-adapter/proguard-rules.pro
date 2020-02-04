@@ -19,3 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+-keep public class com.kopirealm.androidethernetadapter.EthernetConfig
+-keep public class com.kopirealm.androidethernetadapter.EthernetAdapter
+-keep public class com.kopirealm.androidethernetadapter.IEthernetFunctions

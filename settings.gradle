@@ -1,2 +1,3 @@
 include ':demo'
 include ':android-ethernet-adapter'
+include ':android-ethernet-adapter-release'
