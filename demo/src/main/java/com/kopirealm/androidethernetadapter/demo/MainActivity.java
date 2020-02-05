@@ -1,6 +1,7 @@
 package com.kopirealm.androidethernetadapter.demo;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Html;
 import android.view.View;
 import android.widget.TextView;
@@ -35,12 +36,14 @@ public class MainActivity extends AppCompatActivity {
         if (ethernetAdapter == null) return;
         if (ethernetAdapter.isSupported()) {
             if (ethernetAdapter.isEthEnabled()) {
-                ethernetAdapter.updateEthDevInfo(false, testEthernetIP, testEthernetGateway, testEthernetSubnetMask, testEthernetDNS);
                 tvDisplay.setText(ethernetAdapter.getSavedEthConfig().toString());
             } else {
                 displayError("Ethernet is disabled.");
-                Snackbar.make(vRoot, "Enable Ethernet", Snackbar.LENGTH_SHORT).setAction("Connect", v -> {
-                    if (!ethernetAdapter.isEthEnabled()) ethernetAdapter.setEthEnabled(true);
+                Snackbar.make(vRoot, "Enable Ethernet", Snackbar.LENGTH_LONG).setAction("Connect", v -> {
+                    ethernetAdapter.setEthEnabled(true);
+                    ethernetAdapter.updateEthDevInfo(false, testEthernetIP, testEthernetGateway, testEthernetSubnetMask, testEthernetDNS);
+                    new Handler(getMainLooper()).postDelayed(() -> testEthernetAdapter(), 3000);
+                    tvDisplay.setText("Ethernet enabled.");
                 }).show();
             }
         } else {
