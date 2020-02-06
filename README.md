@@ -52,8 +52,8 @@ More Information
 License
 -------
 
-Licensed under the GNU General Public License v3.0 (the "License");
-Copyright 2013 Kopihao.MY
+    Licensed under the GNU General Public License v3.0 (the "License");
+    Copyright 2013 Kopihao.MY
 
  [1]: https://github.com/kopihao/android-ethernet-adapter/
  [2]: https://stackoverflow.com/questions/tagged/android-ethernet-adapter?sort=frequent
