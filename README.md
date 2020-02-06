@@ -44,7 +44,7 @@ Demostration
 
 Add to your Android project
 --------
-<a href="https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.kopihao%22%20AND%20a%3A%22peasy-recyclerview%22"><img src="https://img.shields.io/maven-central/v/com.github.kopihao/peasy-recyclerview.svg"></a>
+<a href="https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.kopihao%22%20AND%20a%3A%android-ethernet-adapter%22"><img src="https://img.shields.io/maven-central/v/com.github.kopihao/android-ethernet-adapter.svg"></a>
 
 ```gradle
 dependencies {
