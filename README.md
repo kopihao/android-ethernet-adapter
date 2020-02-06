@@ -4,7 +4,7 @@ Android Ethernet Adapter
 ![Logo](https://raw.githubusercontent.com/kopihao/android-ethernet-adapter/phase1/photoshop/android-ethernet-adapter-logo.png)
 
 # What's good?
-#### Convenient way to access EthernetManager that is a hidden class of Native Android API without private ASOP android.jar.
+#### Convenient way to access android.net.EthernetManager that is a hidden Native Android API without complex Android SDK setup.
 
 #### Java reflections work behind the scene.
 
