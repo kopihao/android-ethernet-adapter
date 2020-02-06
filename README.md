@@ -44,7 +44,7 @@ Demostration
 
 Add to your Android project
 --------
-<a href="https://search.maven.org/#search%7Cga%7C1%7Cg%3A%22com.github.kopihao%22%20AND%20a%3A%android-ethernet-adapter%22"><img src="https://img.shields.io/maven-central/v/com.github.kopihao/android-ethernet-adapter.svg"></a>
+<img src="https://img.shields.io/bintray/v/kopihao/maven/android-ethernet-adapter.svg"> <img src="https://img.shields.io/maven-central/v/com.github.kopihao/android-ethernet-adapter.svg">
 
 ```gradle
 dependencies {
