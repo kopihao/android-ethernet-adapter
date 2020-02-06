@@ -31,7 +31,7 @@ EthernetAdapter ethernetAdapter = new EthernetAdapter(getApplicationContext());
 ```
 
 ### Warning
-* Android Ethernet only works with signed application with the [platform signature][4]
+* Android Ethernet only works with [signed application with the system signature][4]
 * Requires declaration of android:sharedUserId="android.uid.system in AndroidManifest.xml
 * Requires signingConfig in build.gradle of application
 
