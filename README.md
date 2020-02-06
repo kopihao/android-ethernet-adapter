@@ -6,7 +6,7 @@ Android Ethernet Adapter
 # What's good?
 #### Convenient way to access EthernetManager that is a hidden class of Native Android API without private ASOP android.jar.
 
-#### Java reflections behind the scene.
+#### Java reflections work behind the scene.
 
 ### Minimal methods to get things work
 
