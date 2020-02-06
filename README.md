@@ -25,10 +25,15 @@ Android Ethernet Adapter
     5) `dns`
     6) `mode`
 
-* Get your new instance simply by:
+* Get new instance simply by:
 ```java
 EthernetAdapter ethernetAdapter = new EthernetAdapter(getApplicationContext()); 
 ```
+
+### Warning
+* Android Ethernet only works with signed application with the platform signature [4]
+* Requires declaration of android:sharedUserId="android.uid.system in AndroidManifest.xml
+* Requires signingConfig in build.gradle of application
 
 Demostration
 --------  
@@ -58,3 +63,4 @@ License
  [1]: https://github.com/kopihao/android-ethernet-adapter/
  [2]: https://stackoverflow.com/questions/tagged/android-ethernet-adapter?sort=frequent
  [3]: https://github.com/kopihao/android-ethernet-adapter/blob/phase1/demo/src/main/java/com/kopirealm/androidethernetadapter/demo/MainActivity.java
+ [4]: https://stackoverflow.com/questions/37586255/signing-my-android-application-as-system-app
