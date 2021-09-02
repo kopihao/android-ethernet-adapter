@@ -38,7 +38,7 @@ EthernetAdapter ethernetAdapter = new EthernetAdapter(getApplicationContext());
 Demostration
 --------  
 
-![Preview](https://im6.ezgif.com/tmp/ezgif-6-f9620a94d0d1.gif)
+![Preview](https://github.com/kopihao/android-ethernet-adapter/blob/phase1/website/static/demo_preview.gif)
 
 ##### __Please checkout [source code][3]__
 
